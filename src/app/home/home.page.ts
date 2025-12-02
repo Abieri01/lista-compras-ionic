@@ -221,4 +221,51 @@ export class HomePage implements OnInit {
     this.novaCategoriaPersonalizada = '';
     this.novaCategoria = nome; // já seleciona pro próximo item
   }
+
+  compartilharWhatsApp() {
+    const itensBase = this.listaFiltrada.length ? this.listaFiltrada : this.lista;
+
+    if (!itensBase.length) {
+      return;
+    }
+
+    // Monta texto agrupado por categoria
+    const mapa = new Map<string, ShoppingItem[]>();
+
+    for (const item of itensBase) {
+      const cat = item.categoria || 'Geral';
+      if (!mapa.has(cat)) {
+        mapa.set(cat, []);
+      }
+      mapa.get(cat)!.push(item);
+    }
+
+    const linhas: string[] = [];
+    linhas.push('🛒 Minha lista de compras:\n');
+
+    const categoriasOrdenadas = Array.from(mapa.keys()).sort((a, b) =>
+      a.localeCompare(b, 'pt-BR')
+    );
+
+    for (const categoria of categoriasOrdenadas) {
+      linhas.push(`📂 ${categoria}:`);
+      const itens = mapa.get(categoria)!;
+
+      itens.sort((a, b) =>
+        a.nome.toLowerCase().localeCompare(b.nome.toLowerCase(), 'pt-BR')
+      );
+
+      for (const i of itens) {
+        const check = i.comprado ? '✅' : '⬜';
+        linhas.push(`  ${check} ${i.nome} (Qtd: ${i.quantidade})`);
+      }
+
+      linhas.push('');
+    }
+
+    const texto = linhas.join('\n');
+    const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+
+    window.open(url, '_blank');
+  }
 }
