@@ -6,7 +6,7 @@ export interface ShoppingItem {
   nome: string;
   quantidade: number;
   comprado: boolean;
-  categoria: string;   // <-- NOVO
+  categoria: string;   // sempre terá alguma categoria
 }
 
 @Injectable({
@@ -32,10 +32,16 @@ export class ShoppingListService {
   }
 
   getItens(): ShoppingItem[] {
+    // opcional: retornar cópia pra evitar mutação externa
     return this.lista;
+    // return [...this.lista];
   }
 
-  async adicionar(nome: string, quantidade: number = 1, categoria: string = 'Geral') {
+  async adicionar(
+    nome: string,
+    quantidade: number = 1,
+    categoria: string = 'Geral'
+  ) {
     const item: ShoppingItem = {
       id: Date.now(),
       nome,
@@ -62,6 +68,27 @@ export class ShoppingListService {
 
   async limpar() {
     this.lista = [];
+    await this.salvar();
+  }
+
+  // 🆕 Atualizar nome / quantidade / categoria de um item
+  async atualizar(
+    id: number,
+    dados: Partial<Pick<ShoppingItem, 'nome' | 'quantidade' | 'categoria'>>
+  ) {
+    this.lista = this.lista.map((i) => {
+      if (i.id !== id) return i;
+
+      return {
+        ...i,
+        nome: dados.nome !== undefined ? dados.nome : i.nome,
+        quantidade:
+          dados.quantidade !== undefined ? dados.quantidade : i.quantidade,
+        categoria:
+          dados.categoria !== undefined ? dados.categoria : i.categoria,
+      };
+    });
+
     await this.salvar();
   }
 

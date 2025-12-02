@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 import {
   IonHeader,
   IonToolbar,
@@ -89,7 +90,10 @@ export class HomePage implements OnInit {
   // lista
   lista: ShoppingItem[] = [];
 
-  constructor(private shoppingService: ShoppingListService) {}
+  constructor(
+  private shoppingService: ShoppingListService,
+  private alertController: AlertController
+) {}
 
   ngOnInit() {
     setTimeout(() => {
@@ -266,10 +270,28 @@ export class HomePage implements OnInit {
     this.novaCategoria = 'Geral';
   }
 
-  async remover(item: ShoppingItem) {
-    await this.shoppingService.remover(item.id);
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    async remover(item: ShoppingItem) {
+    const alert = await this.alertController.create({
+      header: 'Remover item',
+      message: `Deseja remover "<strong>${item.nome}</strong>" da lista?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Remover',
+          role: 'destructive',
+          handler: async () => {
+            await this.shoppingService.remover(item.id);
+            this.lista = this.shoppingService.getItens();
+            this.ordenarLista();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   async alternarComprado(item: ShoppingItem) {
@@ -278,14 +300,32 @@ export class HomePage implements OnInit {
     this.ordenarLista();
   }
 
-  async limparTudo() {
-    const temItens = this.lista.length > 0;
-    if (!temItens) return;
+    async limparTudo() {
+    if (!this.lista.length) {
+      return;
+    }
 
-    // aqui poderia ter um ion-alert de confirmação (próxima melhoria se quiser)
-    await this.shoppingService.limpar();
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    const alert = await this.alertController.create({
+      header: 'Limpar tudo?',
+      message: 'Isso vai apagar TODOS os itens da lista.',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Limpar',
+          role: 'destructive',
+          handler: async () => {
+            await this.shoppingService.limpar();
+            this.lista = this.shoppingService.getItens();
+            this.ordenarLista();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   adicionarCategoriaPersonalizada() {
@@ -317,15 +357,95 @@ export class HomePage implements OnInit {
     this.ordenarLista();
   }
 
-  async limparApenasComprados() {
+    async limparApenasComprados() {
     const comprados = this.lista.filter((i) => i.comprado);
-
-    for (const item of comprados) {
-      await this.shoppingService.remover(item.id);
+    if (!comprados.length) {
+      return;
     }
 
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    const alert = await this.alertController.create({
+      header: 'Remover itens comprados?',
+      message: `Isso vai remover ${comprados.length} item(ns) já marcados como comprados.`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Remover',
+          role: 'destructive',
+          handler: async () => {
+            for (const item of comprados) {
+              await this.shoppingService.remover(item.id);
+            }
+            this.lista = this.shoppingService.getItens();
+            this.ordenarLista();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async editar(item: ShoppingItem) {
+    const alert = await this.alertController.create({
+      header: 'Editar item',
+      inputs: [
+        {
+          name: 'nome',
+          type: 'text',
+          value: item.nome,
+          placeholder: 'Nome do produto',
+        },
+        {
+          name: 'quantidade',
+          type: 'number',
+          value: String(item.quantidade),
+          min: 1,
+        },
+        {
+          name: 'categoria',
+          type: 'text',
+          value: item.categoria || 'Geral',
+          placeholder: 'Categoria',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Salvar',
+          handler: (data) => {
+            const nome = (data.nome ?? '').trim();
+            const qtd = parseInt(data.quantidade, 10) || 1;
+            const cat = (data.categoria ?? '').trim() || 'Geral';
+
+            if (!nome) {
+              // se não tiver nome, não deixa fechar salvando
+              return false;
+            }
+
+            this.shoppingService
+              .atualizar(item.id, {
+                nome,
+                quantidade: qtd,
+                categoria: cat,
+              })
+              .then(() => {
+                this.lista = this.shoppingService.getItens();
+                this.ordenarLista();
+              });
+
+            return true;
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   // ---------------------------
