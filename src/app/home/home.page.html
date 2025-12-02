@@ -4,6 +4,7 @@
 
     <ion-buttons slot="end">
       <ion-button (click)="limparTudo()" [disabled]="lista.length === 0">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
         Limpar
       </ion-button>
     </ion-buttons>
@@ -17,7 +18,17 @@
     <ion-card-header>
       <ion-card-title>Filtros</ion-card-title>
     </ion-card-header>
+
     <ion-card-content>
+      <!-- Contadores -->
+      <div class="resumo-lista">
+        <p>
+          Itens: {{ totalItens }} •
+          Não comprados: {{ totalNaoComprados }} •
+          Comprados: {{ totalComprados }}
+        </p>
+      </div>
+
       <ion-item>
         <ion-label>Categoria</ion-label>
         <ion-select [(ngModel)]="categoriaFiltro" interface="popover">
@@ -31,14 +42,35 @@
       <ion-item lines="none">
         <ion-label>Ver apenas não comprados</ion-label>
         <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
-        <ion-button
+      </ion-item>
+
+      <ion-button
         expand="block"
         class="ion-margin-top"
         (click)="compartilharWhatsApp()"
         [disabled]="lista.length === 0">
+        <ion-icon slot="start" name="share-social-outline"></ion-icon>
         Compartilhar no WhatsApp
       </ion-button>
-      </ion-item>
+
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        (click)="marcarTodosComoComprados()"
+        [disabled]="totalNaoComprados === 0">
+        <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+        Marcar todos como comprados
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
+        color="medium"
+        (click)="limparApenasComprados()"
+        [disabled]="totalComprados === 0">
+        <ion-icon slot="start" name="trash-bin-outline"></ion-icon>
+        Remover itens comprados
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
@@ -88,6 +120,7 @@
         expand="block"
         class="ion-margin-top"
         (click)="adicionarCategoriaPersonalizada()">
+        <ion-icon slot="start" name="pricetag-outline"></ion-icon>
         Adicionar categoria
       </ion-button>
 
@@ -95,14 +128,15 @@
         expand="block"
         class="ion-margin-top"
         (click)="adicionar()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
         Adicionar item
       </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <!-- Lista agrupada por categoria -->
-  <ng-container *ngIf="gruposPorCategoria.length > 0; else semItens">
-    <div *ngFor="let grupo of gruposPorCategoria" class="grupo-categoria">
+  <!-- Lista agrupada por categoria - NÃO comprados -->
+  <ng-container *ngIf="gruposPorCategoriaNaoComprados.length > 0; else semItens">
+    <div *ngFor="let grupo of gruposPorCategoriaNaoComprados" class="grupo-categoria">
       <h2 class="categoria-titulo">{{ grupo.categoria }}</h2>
 
       <ion-list>
@@ -124,6 +158,45 @@
 
           <ion-item-options side="end">
             <ion-item-option color="danger" (click)="remover(item)">
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
+              Remover
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </div>
+  </ng-container>
+
+  <!-- Seção de COMPRADOS -->
+  <ng-container *ngIf="!mostrarSomenteNaoComprados && gruposPorCategoriaComprados.length > 0">
+    <h2 class="secao-comprados-titulo">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      &nbsp;Comprados
+    </h2>
+
+    <div *ngFor="let grupo of gruposPorCategoriaComprados" class="grupo-categoria grupo-comprados">
+      <h3 class="categoria-titulo">{{ grupo.categoria }}</h3>
+
+      <ion-list>
+        <ion-item-sliding *ngFor="let item of grupo.itens">
+          <ion-item (click)="alternarComprado(item)">
+            <ion-checkbox
+              slot="start"
+              [checked]="item.comprado"
+              (ionChange)="alternarComprado(item)">
+            </ion-checkbox>
+
+            <ion-label>
+              <h2 [ngClass]="{ 'comprado': item.comprado }">
+                {{ item.nome }}
+              </h2>
+              <p>Qtd: {{ item.quantidade }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="remover(item)">
+              <ion-icon slot="start" name="trash-outline"></ion-icon>
               Remover
             </ion-item-option>
           </ion-item-options>

@@ -98,7 +98,24 @@ export class HomePage implements OnInit {
     }, 300);
   }
 
-  // todas as categorias disponíveis (padrão + personalizadas)
+  // ---------------------------
+  // CONTADORES
+  // ---------------------------
+  get totalItens(): number {
+    return this.lista.length;
+  }
+
+  get totalNaoComprados(): number {
+    return this.lista.filter((i) => !i.comprado).length;
+  }
+
+  get totalComprados(): number {
+    return this.lista.filter((i) => i.comprado).length;
+  }
+
+  // ---------------------------
+  // CATEGORIAS
+  // ---------------------------
   get categorias(): string[] {
     const set = new Set<string>([
       ...this.categoriasPadrao,
@@ -107,15 +124,20 @@ export class HomePage implements OnInit {
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }
 
-  // lista filtrada (categoria + apenas não comprados)
-  get listaFiltrada(): ShoppingItem[] {
+  // aplica APENAS filtro de categoria
+  private filtrarPorCategoriaBase(): ShoppingItem[] {
     let itens = [...this.lista];
-
     if (this.categoriaFiltro !== 'Todas') {
       itens = itens.filter(
         (i) => (i.categoria || 'Geral') === this.categoriaFiltro
       );
     }
+    return itens;
+  }
+
+  // lista "principal" considerando filtro de categoria e toggle "apenas não comprados"
+  get listaFiltrada(): ShoppingItem[] {
+    let itens = this.filtrarPorCategoriaBase();
 
     if (this.mostrarSomenteNaoComprados) {
       itens = itens.filter((i) => !i.comprado);
@@ -124,11 +146,29 @@ export class HomePage implements OnInit {
     return itens;
   }
 
-  // grupos por categoria para exibir visualmente
-  get gruposPorCategoria(): { categoria: string; itens: ShoppingItem[] }[] {
+  // lista só de comprados, respeitando filtro de categoria,
+  // mas ignorando "apenas não comprados" (se toggle on, não mostra mesmo)
+  get listaCompradosFiltrados(): ShoppingItem[] {
+    if (this.mostrarSomenteNaoComprados) {
+      return [];
+    }
+
+    let itens = this.filtrarPorCategoriaBase();
+    itens = itens.filter((i) => i.comprado);
+
+    return itens;
+  }
+
+  // ---------------------------
+  // AGRUPAMENTO POR CATEGORIA
+  // ---------------------------
+  // grupos de NÃO COMPRADOS
+  get gruposPorCategoriaNaoComprados(): { categoria: string; itens: ShoppingItem[] }[] {
     const mapa = new Map<string, ShoppingItem[]>();
 
-    for (const item of this.listaFiltrada) {
+    const base = this.listaFiltrada.filter((i) => !i.comprado);
+
+    for (const item of base) {
       const cat = item.categoria || 'Geral';
       if (!mapa.has(cat)) {
         mapa.set(cat, []);
@@ -145,7 +185,6 @@ export class HomePage implements OnInit {
       a.categoria.localeCompare(b.categoria, 'pt-BR')
     );
 
-    // itens dentro de cada categoria já vêm ordenados, mas garantimos:
     for (const g of grupos) {
       g.itens.sort((a, b) =>
         a.nome.toLowerCase().localeCompare(b.nome.toLowerCase(), 'pt-BR')
@@ -155,6 +194,41 @@ export class HomePage implements OnInit {
     return grupos;
   }
 
+  // grupos de COMPRADOS (para seção separada lá embaixo)
+  get gruposPorCategoriaComprados(): { categoria: string; itens: ShoppingItem[] }[] {
+    const mapa = new Map<string, ShoppingItem[]>();
+
+    const base = this.listaCompradosFiltrados;
+
+    for (const item of base) {
+      const cat = item.categoria || 'Geral';
+      if (!mapa.has(cat)) {
+        mapa.set(cat, []);
+      }
+      mapa.get(cat)!.push(item);
+    }
+
+    const grupos = Array.from(mapa.entries()).map(([categoria, itens]) => ({
+      categoria,
+      itens,
+    }));
+
+    grupos.sort((a, b) =>
+      a.categoria.localeCompare(b.categoria, 'pt-BR')
+    );
+
+    for (const g of grupos) {
+      g.itens.sort((a, b) =>
+        a.nome.toLowerCase().localeCompare(b.nome.toLowerCase(), 'pt-BR')
+      );
+    }
+
+    return grupos;
+  }
+
+  // ---------------------------
+  // ORDENAR LISTA (armazenada)
+  // ---------------------------
   private ordenarLista() {
     this.lista.sort((a, b) => {
       const catA = (a.categoria || 'Geral').toLowerCase();
@@ -173,6 +247,9 @@ export class HomePage implements OnInit {
     });
   }
 
+  // ---------------------------
+  // AÇÕES DE ITENS
+  // ---------------------------
   async adicionar() {
     const nome = this.novoItemNome.trim();
     const qtd = this.novoItemQuantidade ?? 1;
@@ -202,6 +279,10 @@ export class HomePage implements OnInit {
   }
 
   async limparTudo() {
+    const temItens = this.lista.length > 0;
+    if (!temItens) return;
+
+    // aqui poderia ter um ion-alert de confirmação (próxima melhoria se quiser)
     await this.shoppingService.limpar();
     this.lista = this.shoppingService.getItens();
     this.ordenarLista();
@@ -222,6 +303,34 @@ export class HomePage implements OnInit {
     this.novaCategoria = nome; // já seleciona pro próximo item
   }
 
+  // ---------------------------
+  // AÇÕES RÁPIDAS
+  // ---------------------------
+  async marcarTodosComoComprados() {
+    const pendentes = this.lista.filter((i) => !i.comprado);
+
+    for (const item of pendentes) {
+      await this.shoppingService.alternarComprado(item.id);
+    }
+
+    this.lista = this.shoppingService.getItens();
+    this.ordenarLista();
+  }
+
+  async limparApenasComprados() {
+    const comprados = this.lista.filter((i) => i.comprado);
+
+    for (const item of comprados) {
+      await this.shoppingService.remover(item.id);
+    }
+
+    this.lista = this.shoppingService.getItens();
+    this.ordenarLista();
+  }
+
+  // ---------------------------
+  // COMPARTILHAR WHATSAPP
+  // ---------------------------
   compartilharWhatsApp() {
     const itensBase = this.listaFiltrada.length ? this.listaFiltrada : this.lista;
 
@@ -229,7 +338,6 @@ export class HomePage implements OnInit {
       return;
     }
 
-    // Monta texto agrupado por categoria
     const mapa = new Map<string, ShoppingItem[]>();
 
     for (const item of itensBase) {
