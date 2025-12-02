@@ -12,6 +12,29 @@
 
 <ion-content class="ion-padding">
 
+  <!-- Filtros -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Filtros</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Categoria</ion-label>
+        <ion-select [(ngModel)]="categoriaFiltro" interface="popover">
+          <ion-select-option value="Todas">Todas</ion-select-option>
+          <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+            {{ cat }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-label>Ver apenas não comprados</ion-label>
+        <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Formulário para adicionar item -->
   <ion-card>
     <ion-card-header>
@@ -40,52 +63,67 @@
       <ion-item>
         <ion-label>Categoria</ion-label>
         <ion-select [(ngModel)]="novaCategoria" interface="popover">
-          <ion-select-option value="Hortifruti">Hortifruti</ion-select-option>
-          <ion-select-option value="Açougue">Açougue</ion-select-option>
-          <ion-select-option value="Padaria">Padaria</ion-select-option>
-          <ion-select-option value="Bebidas">Bebidas</ion-select-option>
-          <ion-select-option value="Limpeza">Limpeza</ion-select-option>
-          <ion-select-option value="Higiene">Higiene</ion-select-option>
-          <ion-select-option value="Congelados">Congelados</ion-select-option>
-          <ion-select-option value="Geral">Geral</ion-select-option>
+          <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+            {{ cat }}
+          </ion-select-option>
         </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Nova categoria</ion-label>
+        <ion-input
+          [(ngModel)]="novaCategoriaPersonalizada"
+          (keyup.enter)="adicionarCategoriaPersonalizada()">
+        </ion-input>
       </ion-item>
 
       <ion-button
         expand="block"
         class="ion-margin-top"
+        (click)="adicionarCategoriaPersonalizada()">
+        Adicionar categoria
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        class="ion-margin-top"
         (click)="adicionar()">
-        Adicionar
+        Adicionar item
       </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <!-- Lista -->
-  <ion-list *ngIf="lista.length > 0; else semItens">
-    <ion-item-sliding *ngFor="let item of lista">
-      <ion-item (click)="alternarComprado(item)">
-        <ion-checkbox
-          slot="start"
-          [checked]="item.comprado"
-          (ionChange)="alternarComprado(item)">
-        </ion-checkbox>
+  <!-- Lista agrupada por categoria -->
+  <ng-container *ngIf="gruposPorCategoria.length > 0; else semItens">
+    <div *ngFor="let grupo of gruposPorCategoria" class="grupo-categoria">
+      <h2 class="categoria-titulo">{{ grupo.categoria }}</h2>
 
-        <ion-label>
-          <h2 [ngClass]="{ 'comprado': item.comprado }">
-            {{ item.nome }}
-          </h2>
-          <p class="categoria">{{ item.categoria || 'Geral' }}</p>
-          <p>Qtd: {{ item.quantidade }}</p>
-        </ion-label>
-      </ion-item>
+      <ion-list>
+        <ion-item-sliding *ngFor="let item of grupo.itens">
+          <ion-item (click)="alternarComprado(item)">
+            <ion-checkbox
+              slot="start"
+              [checked]="item.comprado"
+              (ionChange)="alternarComprado(item)">
+            </ion-checkbox>
 
-      <ion-item-options side="end">
-        <ion-item-option color="danger" (click)="remover(item)">
-          Remover
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+            <ion-label>
+              <h2 [ngClass]="{ 'comprado': item.comprado }">
+                {{ item.nome }}
+              </h2>
+              <p>Qtd: {{ item.quantidade }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="remover(item)">
+              Remover
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </div>
+  </ng-container>
 
   <ng-template #semItens>
     <div class="sem-itens">
