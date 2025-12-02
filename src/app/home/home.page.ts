@@ -18,6 +18,9 @@ import {
   IonCheckbox,
   IonItemOptions,
   IonItemOption,
+  IonIcon,
+  IonSelect,
+  IonSelectOption,
 } from '@ionic/angular/standalone';
 import { CommonModule, NgIf, NgForOf, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -48,6 +51,9 @@ import { ShoppingListService, ShoppingItem } from '../services/shopping-list';
     IonCheckbox,
     IonItemOptions,
     IonItemOption,
+    IonIcon,
+    IonSelect,
+    IonSelectOption,
     // Angular
     CommonModule,
     FormsModule,
@@ -59,6 +65,7 @@ import { ShoppingListService, ShoppingItem } from '../services/shopping-list';
 export class HomePage implements OnInit {
   novoItemNome = '';
   novoItemQuantidade: number | null = 1;
+  novaCategoria = 'Geral';
   lista: ShoppingItem[] = [];
 
   constructor(private shoppingService: ShoppingListService) {}
@@ -73,14 +80,16 @@ export class HomePage implements OnInit {
   async adicionar() {
     const nome = this.novoItemNome.trim();
     const qtd = this.novoItemQuantidade ?? 1;
+    const cat = this.novaCategoria || 'Geral';
 
     if (!nome) return;
 
-    await this.shoppingService.adicionar(nome, qtd);
+    await this.shoppingService.adicionar(nome, qtd, cat);
     this.lista = this.shoppingService.getItens();
 
     this.novoItemNome = '';
     this.novoItemQuantidade = 1;
+    this.novaCategoria = 'Geral';
   }
 
   async remover(item: ShoppingItem) {

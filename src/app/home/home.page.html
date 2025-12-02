@@ -37,6 +37,20 @@
         </ion-input>
       </ion-item>
 
+      <ion-item>
+        <ion-label>Categoria</ion-label>
+        <ion-select [(ngModel)]="novaCategoria" interface="popover">
+          <ion-select-option value="Hortifruti">Hortifruti</ion-select-option>
+          <ion-select-option value="Açougue">Açougue</ion-select-option>
+          <ion-select-option value="Padaria">Padaria</ion-select-option>
+          <ion-select-option value="Bebidas">Bebidas</ion-select-option>
+          <ion-select-option value="Limpeza">Limpeza</ion-select-option>
+          <ion-select-option value="Higiene">Higiene</ion-select-option>
+          <ion-select-option value="Congelados">Congelados</ion-select-option>
+          <ion-select-option value="Geral">Geral</ion-select-option>
+        </ion-select>
+      </ion-item>
+
       <ion-button
         expand="block"
         class="ion-margin-top"
@@ -60,6 +74,7 @@
           <h2 [ngClass]="{ 'comprado': item.comprado }">
             {{ item.nome }}
           </h2>
+          <p class="categoria">{{ item.categoria || 'Geral' }}</p>
           <p>Qtd: {{ item.quantidade }}</p>
         </ion-label>
       </ion-item>

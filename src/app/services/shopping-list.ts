@@ -6,6 +6,7 @@ export interface ShoppingItem {
   nome: string;
   quantidade: number;
   comprado: boolean;
+  categoria: string;   // <-- NOVO
 }
 
 @Injectable({
@@ -34,12 +35,13 @@ export class ShoppingListService {
     return this.lista;
   }
 
-  async adicionar(nome: string, quantidade: number = 1) {
+  async adicionar(nome: string, quantidade: number = 1, categoria: string = 'Geral') {
     const item: ShoppingItem = {
       id: Date.now(),
       nome,
       quantidade,
       comprado: false,
+      categoria,
     };
 
     this.lista.push(item);
