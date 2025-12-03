@@ -23,6 +23,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonToggle,
+  IonSearchbar,
 } from '@ionic/angular/standalone';
 import { CommonModule, NgIf, NgForOf, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -56,6 +57,7 @@ import { ShoppingListService, ShoppingItem } from '../services/shopping-list';
     IonSelect,
     IonSelectOption,
     IonToggle,
+    IonSearchbar,
     CommonModule,
     FormsModule,
     NgIf,
@@ -86,6 +88,7 @@ export class HomePage implements OnInit {
   // filtros
   categoriaFiltro: string = 'Todas';
   mostrarSomenteNaoComprados = false;
+  termoBusca: string = '';
 
   // lista
   lista: ShoppingItem[] = [];
@@ -140,11 +143,18 @@ export class HomePage implements OnInit {
   }
 
   // lista "principal" considerando filtro de categoria e toggle "apenas não comprados"
-  get listaFiltrada(): ShoppingItem[] {
+    get listaFiltrada(): ShoppingItem[] {
     let itens = this.filtrarPorCategoriaBase();
 
     if (this.mostrarSomenteNaoComprados) {
       itens = itens.filter((i) => !i.comprado);
+    }
+
+    if (this.termoBusca.trim()) {
+      const termo = this.termoBusca.toLowerCase();
+      itens = itens.filter((i) =>
+        i.nome.toLowerCase().includes(termo)
+      );
     }
 
     return itens;
@@ -152,13 +162,20 @@ export class HomePage implements OnInit {
 
   // lista só de comprados, respeitando filtro de categoria,
   // mas ignorando "apenas não comprados" (se toggle on, não mostra mesmo)
-  get listaCompradosFiltrados(): ShoppingItem[] {
+    get listaCompradosFiltrados(): ShoppingItem[] {
     if (this.mostrarSomenteNaoComprados) {
       return [];
     }
 
     let itens = this.filtrarPorCategoriaBase();
     itens = itens.filter((i) => i.comprado);
+
+    if (this.termoBusca.trim()) {
+      const termo = this.termoBusca.toLowerCase();
+      itens = itens.filter((i) =>
+        i.nome.toLowerCase().includes(termo)
+      );
+    }
 
     return itens;
   }

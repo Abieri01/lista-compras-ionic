@@ -44,6 +44,16 @@
         <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
       </ion-item>
 
+       <!-- 🆕 Busca por nome -->
+      <ion-item lines="none">
+        <ion-label position="stacked">Buscar item</ion-label>
+        <ion-searchbar
+          [(ngModel)]="termoBusca"
+          placeholder="Ex: arroz, leite, carne..."
+          debounce="200">
+        </ion-searchbar>
+      </ion-item>
+
       <ion-button
         expand="block"
         class="ion-margin-top"
