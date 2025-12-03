@@ -1,6 +1,14 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Lista de Compras</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="renomearLista()">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>
+      {{ nomeLista }}
+    </ion-title>
 
     <ion-buttons slot="end">
       <ion-button (click)="limparTudo()" [disabled]="lista.length === 0">

@@ -16,12 +16,14 @@ export class ShoppingListService {
   private storageReady = false;
   private lista: ShoppingItem[] = [];
   private readonly STORAGE_KEY = 'lista_compras';
+  private readonly STORAGE_NAME_KEY = 'lista_compras_nome';
 
-  // 🆕 promise que representa o fim do init()
   private initPromise: Promise<void>;
 
+  // nome da lista (default)
+  private nomeLista: string = 'Lista de Compras';
+
   constructor(private storage: Storage) {
-    // em vez de só chamar, a gente GUARDA a promise
     this.initPromise = this.init();
   }
 
@@ -33,15 +35,29 @@ export class ShoppingListService {
     if (saved) {
       this.lista = saved;
     }
+
+    const savedName = await this.storage.get(this.STORAGE_NAME_KEY);
+    if (savedName) {
+      this.nomeLista = savedName;
+    }
   }
 
-  // 🆕 quem quiser pode esperar o storage estar pronto
   async ready(): Promise<void> {
     await this.initPromise;
   }
 
+  // 🆕 nome da lista
+  getNomeLista(): string {
+    return this.nomeLista;
+  }
+
+  async setNomeLista(nome: string) {
+    this.nomeLista = nome || 'Lista de Compras';
+    if (!this.storageReady) return;
+    await this.storage.set(this.STORAGE_NAME_KEY, this.nomeLista);
+  }
+
   getItens(): ShoppingItem[] {
-    // opcional: retornar cópia pra evitar mutação externa
     return this.lista;
     // return [...this.lista];
   }
@@ -80,7 +96,6 @@ export class ShoppingListService {
     await this.salvar();
   }
 
-  // Atualizar nome / quantidade / categoria de um item
   async atualizar(
     id: number,
     dados: Partial<Pick<ShoppingItem, 'nome' | 'quantidade' | 'categoria'>>

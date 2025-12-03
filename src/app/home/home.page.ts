@@ -92,6 +92,8 @@ export class HomePage implements OnInit {
 
   // lista
   lista: ShoppingItem[] = [];
+  // 🆕 nome da lista
+  nomeLista: string = 'Lista de Compras';
 
   constructor(
   private shoppingService: ShoppingListService,
@@ -101,6 +103,7 @@ export class HomePage implements OnInit {
   async ngOnInit() {
   await this.shoppingService.ready();           // espera carregar do storage
   this.lista = this.shoppingService.getItens(); // pega os itens
+  this.nomeLista = this.shoppingService.getNomeLista();
   this.ordenarLista();                          // mantém ordenação bonitinha
 }
 
@@ -362,6 +365,38 @@ export class HomePage implements OnInit {
 
     this.novaCategoriaPersonalizada = '';
     this.novaCategoria = nome; // já seleciona pro próximo item
+  }
+
+    async renomearLista() {
+    const alert = await this.alertController.create({
+      header: 'Nome da lista',
+      inputs: [
+        {
+          name: 'nome',
+          type: 'text',
+          value: this.nomeLista,
+          placeholder: 'Ex: Lista do mês, Churrasco...',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Salvar',
+          handler: async (data) => {
+            const nome = (data.nome ?? '').trim();
+            const novoNome = nome || 'Lista de Compras';
+
+            await this.shoppingService.setNomeLista(novoNome);
+            this.nomeLista = novoNome;
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   // ---------------------------
