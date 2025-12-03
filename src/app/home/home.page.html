@@ -24,6 +24,7 @@
       <div class="resumo-lista">
         <p>
           Itens: {{ totalItens }} •
+          Unidades: {{ totalUnidades }} •
           Não comprados: {{ totalNaoComprados }} •
           Comprados: {{ totalComprados }}
         </p>
@@ -154,8 +155,7 @@
           <ion-item (click)="alternarComprado(item)">
             <ion-checkbox
               slot="start"
-              [checked]="item.comprado"
-              (ionChange)="alternarComprado(item)">
+              [checked]="item.comprado">
             </ion-checkbox>
 
             <ion-label>
@@ -198,8 +198,7 @@
           <ion-item (click)="alternarComprado(item)">
             <ion-checkbox
               slot="start"
-              [checked]="item.comprado"
-              (ionChange)="alternarComprado(item)">
+              [checked]="item.comprado">
             </ion-checkbox>
 
             <ion-label>

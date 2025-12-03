@@ -120,6 +120,10 @@ export class HomePage implements OnInit {
     return this.lista.filter((i) => i.comprado).length;
   }
 
+   get totalUnidades(): number {
+    return this.lista.reduce((acc, item) => acc + (item.quantidade || 0), 0);
+  }
+
   // ---------------------------
   // CATEGORIAS
   // ---------------------------
