@@ -98,12 +98,12 @@ export class HomePage implements OnInit {
   private alertController: AlertController
 ) {}
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.lista = this.shoppingService.getItens();
-      this.ordenarLista();
-    }, 300);
-  }
+  async ngOnInit() {
+  await this.shoppingService.ready();           // espera carregar do storage
+  this.lista = this.shoppingService.getItens(); // pega os itens
+  this.ordenarLista();                          // mantém ordenação bonitinha
+}
+
 
   // ---------------------------
   // CONTADORES

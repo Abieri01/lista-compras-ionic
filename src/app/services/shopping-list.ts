@@ -17,8 +17,12 @@ export class ShoppingListService {
   private lista: ShoppingItem[] = [];
   private readonly STORAGE_KEY = 'lista_compras';
 
+  // 🆕 promise que representa o fim do init()
+  private initPromise: Promise<void>;
+
   constructor(private storage: Storage) {
-    this.init();
+    // em vez de só chamar, a gente GUARDA a promise
+    this.initPromise = this.init();
   }
 
   private async init() {
@@ -29,6 +33,11 @@ export class ShoppingListService {
     if (saved) {
       this.lista = saved;
     }
+  }
+
+  // 🆕 quem quiser pode esperar o storage estar pronto
+  async ready(): Promise<void> {
+    await this.initPromise;
   }
 
   getItens(): ShoppingItem[] {
@@ -71,7 +80,7 @@ export class ShoppingListService {
     await this.salvar();
   }
 
-  // 🆕 Atualizar nome / quantidade / categoria de um item
+  // Atualizar nome / quantidade / categoria de um item
   async atualizar(
     id: number,
     dados: Partial<Pick<ShoppingItem, 'nome' | 'quantidade' | 'categoria'>>
