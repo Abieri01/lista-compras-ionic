@@ -7,7 +7,12 @@
     </ion-buttons>
 
     <ion-title>
-      {{ nomeLista }}
+      <div class="title-main">
+        {{ nomeLista }}
+      </div>
+      <div class="title-sub">
+        Organize suas listas de compras
+      </div>
     </ion-title>
 
     <ion-buttons slot="end">
@@ -19,259 +24,296 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="home-content">
+  <div class="home-wrapper ion-padding">
 
-  <!-- Filtros -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Filtros</ion-card-title>
-    </ion-card-header>
+    <!-- CARD: Filtros e configurações -->
+    <ion-card class="card-filtros">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="funnel-outline"></ion-icon>
+          <span>Filtros & Lista</span>
+        </ion-card-title>
+      </ion-card-header>
 
-        <ion-card-content>
-      <!-- 🆕 Seleção de lista + botão criar -->
-      <ion-item>
-        <ion-label>Lista</ion-label>
-        <ion-select
-          [(ngModel)]="listaSelecionadaId"
-          interface="popover"
-          (ionChange)="trocarLista()">
-          <ion-select-option
-            *ngFor="let l of listas"
-            [value]="l.id">
-            {{ l.nome }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+      <ion-card-content>
 
-      <ion-button
-        expand="block"
-        fill="outline"
-        size="small"
-        class="ion-margin-bottom"
-        (click)="novaLista()">
-        <ion-icon slot="start" name="add-outline"></ion-icon>
-        Nova lista
-      </ion-button>
+        <!-- Seleção de lista + criar nova -->
+        <ion-item>
+          <ion-label>Lista</ion-label>
+          <ion-select
+            [(ngModel)]="listaSelecionadaId"
+            interface="popover"
+            (ionChange)="trocarLista()">
+            <ion-select-option
+              *ngFor="let l of listas"
+              [value]="l.id">
+              {{ l.nome }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
 
-      <!-- Contadores -->
-      <div class="resumo-lista">
-        <p>
-          Itens: {{ totalItens }} •
-          Unidades: {{ totalUnidades }} •
-          Não comprados: {{ totalNaoComprados }} •
-          Comprados: {{ totalComprados }}
-        </p>
+        <ion-button
+          expand="block"
+          fill="outline"
+          size="small"
+          class="ion-margin-bottom"
+          (click)="novaLista()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Nova lista
+        </ion-button>
+
+        <!-- Resumo da lista -->
+        <div class="resumo-lista">
+          <div class="resumo-item">
+            <span class="resumo-label">Itens</span>
+            <span class="resumo-valor">{{ totalItens }}</span>
+          </div>
+          <div class="resumo-item">
+            <span class="resumo-label">Unidades</span>
+            <span class="resumo-valor">{{ totalUnidades }}</span>
+          </div>
+          <div class="resumo-item">
+            <span class="resumo-label">Não comprados</span>
+            <span class="resumo-valor destaque">{{ totalNaoComprados }}</span>
+          </div>
+          <div class="resumo-item">
+            <span class="resumo-label">Comprados</span>
+            <span class="resumo-valor">{{ totalComprados }}</span>
+          </div>
+        </div>
+
+        <!-- Categoria e filtros -->
+        <ion-item>
+          <ion-label>Categoria</ion-label>
+          <ion-select [(ngModel)]="categoriaFiltro" interface="popover">
+            <ion-select-option value="Todas">Todas</ion-select-option>
+            <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+              {{ cat }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label>Ver apenas não comprados</ion-label>
+          <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label>Modo escuro</ion-label>
+          <ion-toggle
+            [(ngModel)]="temaEscuro"
+            (ionChange)="alternarTema($event)">
+          </ion-toggle>
+        </ion-item>
+
+        <!-- Busca -->
+        <ion-item lines="none" class="buscar-item">
+          <ion-label position="stacked">Buscar item</ion-label>
+          <ion-searchbar
+            [(ngModel)]="termoBusca"
+            placeholder="Ex: arroz, leite, carne..."
+            debounce="200">
+          </ion-searchbar>
+        </ion-item>
+
+        <!-- Ações rápidas -->
+        <div class="acoes-rapidas">
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            (click)="compartilharWhatsApp()"
+            [disabled]="lista.length === 0">
+            <ion-icon slot="start" name="share-social-outline"></ion-icon>
+            Compartilhar no WhatsApp
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            (click)="marcarTodosComoComprados()"
+            [disabled]="totalNaoComprados === 0">
+            <ion-icon slot="start" name="checkbox-outline"></ion-icon>
+            Marcar todos como comprados
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            class="ion-margin-top"
+            color="medium"
+            (click)="limparApenasComprados()"
+            [disabled]="totalComprados === 0">
+            <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+            Remover itens comprados
+          </ion-button>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+
+    <!-- CARD: Adicionar item -->
+    <ion-card class="card-adicionar">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="cart-outline"></ion-icon>
+          <span>Adicionar item</span>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Nome do produto</ion-label>
+          <ion-input
+            [(ngModel)]="novoItemNome"
+            (keyup.enter)="adicionar()">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Quantidade</ion-label>
+          <ion-input
+            type="number"
+            min="1"
+            [(ngModel)]="novoItemQuantidade"
+            (keyup.enter)="adicionar()">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>Categoria</ion-label>
+          <ion-select [(ngModel)]="novaCategoria" interface="popover">
+            <ion-select-option *ngFor="let cat of categorias" [value]="cat">
+              {{ cat }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Nova categoria</ion-label>
+          <ion-input
+            [(ngModel)]="novaCategoriaPersonalizada"
+            (keyup.enter)="adicionarCategoriaPersonalizada()">
+          </ion-input>
+        </ion-item>
+
+        <div class="botoes-adicionar">
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="adicionarCategoriaPersonalizada()">
+            <ion-icon slot="start" name="pricetag-outline"></ion-icon>
+            Adicionar categoria
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            (click)="adicionar()">
+            <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+            Adicionar item
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- LISTA AGRUPADA POR CATEGORIA -->
+    <ng-container *ngIf="gruposPorCategoriaNaoComprados.length > 0; else semItens">
+      <!-- NÃO comprados -->
+      <h2 class="secao-titulo">
+        <ion-icon name="list-outline"></ion-icon>
+        <span>Itens para comprar</span>
+      </h2>
+
+      <div *ngFor="let grupo of gruposPorCategoriaNaoComprados" class="grupo-categoria">
+        <div class="categoria-header">
+          <div class="categoria-nome">
+            {{ grupo.categoria }}
+          </div>
+          <div class="categoria-meta">
+            {{ grupo.itens.length }} item{{ grupo.itens.length > 1 ? 's' : '' }}
+          </div>
+        </div>
+
+        <ion-list>
+          <ion-item-sliding *ngFor="let item of grupo.itens">
+            <ion-item (click)="alternarComprado(item)">
+              <ion-checkbox
+                slot="start"
+                [checked]="item.comprado">
+              </ion-checkbox>
+
+              <ion-label>
+                <h2 [ngClass]="{ 'comprado': item.comprado }">
+                  {{ item.nome }}
+                </h2>
+                <p>Qtd: {{ item.quantidade }}</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item-options side="end">
+              <ion-item-option color="primary" (click)="editar(item)">
+                Editar
+              </ion-item-option>
+              <ion-item-option color="danger" (click)="remover(item)">
+                Remover
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-list>
       </div>
+    </ng-container>
 
-      <ion-item>
-        <ion-label>Categoria</ion-label>
-        <ion-select [(ngModel)]="categoriaFiltro" interface="popover">
-          <ion-select-option value="Todas">Todas</ion-select-option>
-          <ion-select-option *ngFor="let cat of categorias" [value]="cat">
-            {{ cat }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+    <!-- COMPRADOS -->
+    <ng-container *ngIf="!mostrarSomenteNaoComprados && gruposPorCategoriaComprados.length > 0">
+      <h2 class="secao-titulo secao-comprados-titulo">
+        <ion-icon name="checkmark-done-outline"></ion-icon>
+        <span>Comprados</span>
+      </h2>
 
-      <ion-item lines="none">
-        <ion-label>Ver apenas não comprados</ion-label>
-        <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
-      </ion-item>
+      <div *ngFor="let grupo of gruposPorCategoriaComprados" class="grupo-categoria grupo-comprados">
+        <div class="categoria-header">
+          <div class="categoria-nome">
+            {{ grupo.categoria }}
+          </div>
+          <div class="categoria-meta">
+            {{ grupo.itens.length }} item{{ grupo.itens.length > 1 ? 's' : '' }}
+          </div>
+        </div>
 
-            <!-- 🆕 Modo escuro -->
-      <ion-item lines="none">
-        <ion-label>Modo escuro</ion-label>
-        <ion-toggle
-          [(ngModel)]="temaEscuro"
-          (ionChange)="alternarTema($event)">
-        </ion-toggle>
-      </ion-item>
+        <ion-list>
+          <ion-item-sliding *ngFor="let item of grupo.itens">
+            <ion-item (click)="alternarComprado(item)">
+              <ion-checkbox
+                slot="start"
+                [checked]="item.comprado">
+              </ion-checkbox>
 
-       <!-- 🆕 Busca por nome -->
-      <ion-item lines="none">
-        <ion-label position="stacked">Buscar item</ion-label>
-        <ion-searchbar
-          [(ngModel)]="termoBusca"
-          placeholder="Ex: arroz, leite, carne..."
-          debounce="200">
-        </ion-searchbar>
-      </ion-item>
+              <ion-label>
+                <h2 [ngClass]="{ 'comprado': item.comprado }">
+                  {{ item.nome }}
+                </h2>
+                <p>Qtd: {{ item.quantidade }}</p>
+              </ion-label>
+            </ion-item>
 
-      <ion-button
-        expand="block"
-        class="ion-margin-top"
-        (click)="compartilharWhatsApp()"
-        [disabled]="lista.length === 0">
-        <ion-icon slot="start" name="share-social-outline"></ion-icon>
-        Compartilhar no WhatsApp
-      </ion-button>
+            <ion-item-options side="end">
+              <ion-item-option color="primary" (click)="editar(item)">
+                Editar
+              </ion-item-option>
+              <ion-item-option color="danger" (click)="remover(item)">
+                Remover
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-list>
+      </div>
+    </ng-container>
 
-      <ion-button
-        expand="block"
-        class="ion-margin-top"
-        (click)="marcarTodosComoComprados()"
-        [disabled]="totalNaoComprados === 0">
-        <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
-        Marcar todos como comprados
-      </ion-button>
+    <ng-template #semItens>
+      <div class="sem-itens">
+        <ion-icon name="cart-outline"></ion-icon>
+        <p>Sua lista ainda está vazia. Comece adicionando um item 😊</p>
+      </div>
+    </ng-template>
 
-      <ion-button
-        expand="block"
-        class="ion-margin-top"
-        color="medium"
-        (click)="limparApenasComprados()"
-        [disabled]="totalComprados === 0">
-        <ion-icon slot="start" name="trash-bin-outline"></ion-icon>
-        Remover itens comprados
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Formulário para adicionar item -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Adicionar item</ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <ion-item>
-        <ion-label position="floating">Nome do produto</ion-label>
-        <ion-input
-          [(ngModel)]="novoItemNome"
-          (keyup.enter)="adicionar()">
-        </ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="floating">Quantidade</ion-label>
-        <ion-input
-          type="number"
-          min="1"
-          [(ngModel)]="novoItemQuantidade"
-          (keyup.enter)="adicionar()">
-        </ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label>Categoria</ion-label>
-        <ion-select [(ngModel)]="novaCategoria" interface="popover">
-          <ion-select-option *ngFor="let cat of categorias" [value]="cat">
-            {{ cat }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="floating">Nova categoria</ion-label>
-        <ion-input
-          [(ngModel)]="novaCategoriaPersonalizada"
-          (keyup.enter)="adicionarCategoriaPersonalizada()">
-        </ion-input>
-      </ion-item>
-
-      <ion-button
-        expand="block"
-        class="ion-margin-top"
-        (click)="adicionarCategoriaPersonalizada()">
-        <ion-icon slot="start" name="pricetag-outline"></ion-icon>
-        Adicionar categoria
-      </ion-button>
-
-      <ion-button
-        expand="block"
-        class="ion-margin-top"
-        (click)="adicionar()">
-        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-        Adicionar item
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Lista agrupada por categoria - NÃO comprados -->
-  <ng-container *ngIf="gruposPorCategoriaNaoComprados.length > 0; else semItens">
-    <div *ngFor="let grupo of gruposPorCategoriaNaoComprados" class="grupo-categoria">
-      <h2 class="categoria-titulo">{{ grupo.categoria }}</h2>
-
-      <ion-list>
-        <ion-item-sliding *ngFor="let item of grupo.itens">
-          <ion-item (click)="alternarComprado(item)">
-            <ion-checkbox
-              slot="start"
-              [checked]="item.comprado">
-            </ion-checkbox>
-
-            <ion-label>
-              <h2 [ngClass]="{ 'comprado': item.comprado }">
-                {{ item.nome }}
-              </h2>
-              <p>Qtd: {{ item.quantidade }}</p>
-            </ion-label>
-          </ion-item>
-
-                    <ion-item-options side="end">
-            <ion-item-option color="primary" (click)="editar(item)">
-              <ion-icon slot="start" name="create-outline"></ion-icon>
-              Editar
-            </ion-item-option>
-
-            <ion-item-option color="danger" (click)="remover(item)">
-              <ion-icon slot="start" name="trash-outline"></ion-icon>
-              Remover
-            </ion-item-option>
-          </ion-item-options>
-
-        </ion-item-sliding>
-      </ion-list>
-    </div>
-  </ng-container>
-
-  <!-- Seção de COMPRADOS -->
-  <ng-container *ngIf="!mostrarSomenteNaoComprados && gruposPorCategoriaComprados.length > 0">
-    <h2 class="secao-comprados-titulo">
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
-      &nbsp;Comprados
-    </h2>
-
-    <div *ngFor="let grupo of gruposPorCategoriaComprados" class="grupo-categoria grupo-comprados">
-      <h3 class="categoria-titulo">{{ grupo.categoria }}</h3>
-
-      <ion-list>
-        <ion-item-sliding *ngFor="let item of grupo.itens">
-          <ion-item (click)="alternarComprado(item)">
-            <ion-checkbox
-              slot="start"
-              [checked]="item.comprado">
-            </ion-checkbox>
-
-            <ion-label>
-              <h2 [ngClass]="{ 'comprado': item.comprado }">
-                {{ item.nome }}
-              </h2>
-              <p>Qtd: {{ item.quantidade }}</p>
-            </ion-label>
-          </ion-item>
-
-                    <ion-item-options side="end">
-            <ion-item-option color="primary" (click)="editar(item)">
-              <ion-icon slot="start" name="create-outline"></ion-icon>
-              Editar
-            </ion-item-option>
-
-            <ion-item-option color="danger" (click)="remover(item)">
-              <ion-icon slot="start" name="trash-outline"></ion-icon>
-              Remover
-            </ion-item-option>
-          </ion-item-options>
-
-        </ion-item-sliding>
-      </ion-list>
-    </div>
-  </ng-container>
-
-  <ng-template #semItens>
-    <div class="sem-itens">
-      <p>Sua lista ainda está vazia. Comece adicionando um item 😊</p>
-    </div>
-  </ng-template>
-
+  </div>
 </ion-content>
