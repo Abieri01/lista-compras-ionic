@@ -35,3 +35,47 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* 🔥 Tema escuro básico */
+body.dark {
+  --ion-background-color: #121212;
+  --ion-text-color: #ffffff;
+
+  --ion-toolbar-background: #1f1f1f;
+  --ion-toolbar-color: #ffffff;
+
+  --ion-card-background: #1e1e1e;
+  --ion-item-background: transparent;
+}
+
+/* Fundo do conteúdo em modo escuro */
+body.dark ion-content {
+  --background: #121212;
+}
+
+/* Cards mais escuros */
+body.dark ion-card {
+  --background: #1e1e1e;
+}
+
+/* Texto dentro de itens/cards */
+body.dark ion-label,
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark p {
+  color: #ffffff;
+}
+
+/* 🔎 Searchbar em modo escuro */
+body.dark ion-searchbar {
+  --background: #1f1f1f;          /* fundo da caixa de busca */
+  --color: #ffffff;               /* cor do texto digitado */
+  --placeholder-color: #aaaaaa;   /* cor do placeholder */
+  --icon-color: #aaaaaa;          /* cor do ícone de lupa */
+}
+
+/* Ajuste extra caso precise no input interno */
+body.dark ion-searchbar .searchbar-input {
+  color: #ffffff;
+}

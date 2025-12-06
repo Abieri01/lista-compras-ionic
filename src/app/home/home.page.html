@@ -53,6 +53,15 @@
         <ion-toggle [(ngModel)]="mostrarSomenteNaoComprados"></ion-toggle>
       </ion-item>
 
+            <!-- 🆕 Modo escuro -->
+      <ion-item lines="none">
+        <ion-label>Modo escuro</ion-label>
+        <ion-toggle
+          [(ngModel)]="temaEscuro"
+          (ionChange)="alternarTema($event)">
+        </ion-toggle>
+      </ion-item>
+
        <!-- 🆕 Busca por nome -->
       <ion-item lines="none">
         <ion-label position="stacked">Buscar item</ion-label>

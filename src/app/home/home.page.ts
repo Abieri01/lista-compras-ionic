@@ -1,3 +1,4 @@
+import { ThemeService } from '../services/theme.service';
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import {
@@ -92,21 +93,34 @@ export class HomePage implements OnInit {
 
   // lista
   lista: ShoppingItem[] = [];
+
   // 🆕 nome da lista
   nomeLista: string = 'Lista de Compras';
 
+  // 🆕 tema
+  temaEscuro: boolean = false;
+
   constructor(
   private shoppingService: ShoppingListService,
-  private alertController: AlertController
+  private alertController: AlertController,
+  private themeService: ThemeService,
 ) {}
 
-  async ngOnInit() {
-  await this.shoppingService.ready();           // espera carregar do storage
-  this.lista = this.shoppingService.getItens(); // pega os itens
-  this.nomeLista = this.shoppingService.getNomeLista();
-  this.ordenarLista();                          // mantém ordenação bonitinha
-}
+   async ngOnInit() {
+    await this.shoppingService.ready();
+    this.lista = this.shoppingService.getItens();
+    this.nomeLista = this.shoppingService.getNomeLista();
+    this.ordenarLista();
 
+    // carregar tema salvo
+    this.temaEscuro = this.themeService.carregarTema();
+  }
+
+  alternarTema(event: any) {
+    const enabled = event.detail.checked; // true/false do toggle
+    this.temaEscuro = enabled;
+    this.themeService.setDark(enabled);
+  }
 
   // ---------------------------
   // CONTADORES
