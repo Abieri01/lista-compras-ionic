@@ -97,7 +97,11 @@ export class HomePage implements OnInit {
   // 🆕 nome da lista
   nomeLista: string = 'Lista de Compras';
 
-  // 🆕 tema
+  // multi-listas
+  listas: { id: number; nome: string }[] = [];
+  listaSelecionadaId: number | null = null;
+
+  // tema
   temaEscuro: boolean = false;
 
   constructor(
@@ -107,14 +111,15 @@ export class HomePage implements OnInit {
 ) {}
 
    async ngOnInit() {
-    await this.shoppingService.ready();
-    this.lista = this.shoppingService.getItens();
-    this.nomeLista = this.shoppingService.getNomeLista();
-    this.ordenarLista();
+  await this.shoppingService.ready();
 
-    // carregar tema salvo
-    this.temaEscuro = this.themeService.carregarTema();
-  }
+  // Atualiza listas, itens e nome da lista selecionada
+  this.atualizarListasEDados();
+
+  // Tema salvo
+  this.temaEscuro = this.themeService.carregarTema();
+}
+
 
   alternarTema(event: any) {
     const enabled = event.detail.checked; // true/false do toggle
@@ -288,6 +293,57 @@ export class HomePage implements OnInit {
       return 0;
     });
   }
+  // ---------------------------
+  // ATUALIZAR LISTA E DADOS 
+  // ---------------------------
+    private atualizarListasEDados() {
+    const listasService = this.shoppingService.getListas();
+    this.listas = listasService.map((l) => ({
+      id: l.id,
+      nome: l.nome,
+    }));
+
+    this.listaSelecionadaId = this.shoppingService.getListaAtualId();
+    this.lista = this.shoppingService.getItens();
+    this.nomeLista = this.shoppingService.getNomeLista();
+    this.ordenarLista();
+  }
+
+    async trocarLista() {
+    if (this.listaSelecionadaId == null) return;
+
+    await this.shoppingService.selecionarLista(this.listaSelecionadaId);
+    this.atualizarListasEDados();
+  }
+
+  async novaLista() {
+    const alert = await this.alertController.create({
+      header: 'Nova lista',
+      inputs: [
+        {
+          name: 'nome',
+          type: 'text',
+          placeholder: 'Ex: Mercado do mês, Farmácia...',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Criar',
+          handler: async (data) => {
+            const nome = (data.nome ?? '').trim();
+            await this.shoppingService.criarLista(nome);
+            this.atualizarListasEDados();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
 
   // ---------------------------
   // AÇÕES DE ITENS
@@ -300,8 +356,7 @@ export class HomePage implements OnInit {
     if (!nome) return;
 
     await this.shoppingService.adicionar(nome, qtd, cat);
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    this.atualizarListasEDados();
 
     this.novoItemNome = '';
     this.novoItemQuantidade = 1;
@@ -322,8 +377,7 @@ export class HomePage implements OnInit {
           role: 'destructive',
           handler: async () => {
             await this.shoppingService.remover(item.id);
-            this.lista = this.shoppingService.getItens();
-            this.ordenarLista();
+            this.atualizarListasEDados();
           },
         },
       ],
@@ -334,8 +388,7 @@ export class HomePage implements OnInit {
 
   async alternarComprado(item: ShoppingItem) {
     await this.shoppingService.alternarComprado(item.id);
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    this.atualizarListasEDados();
   }
 
     async limparTudo() {
@@ -356,8 +409,7 @@ export class HomePage implements OnInit {
           role: 'destructive',
           handler: async () => {
             await this.shoppingService.limpar();
-            this.lista = this.shoppingService.getItens();
-            this.ordenarLista();
+            this.atualizarListasEDados();
           },
         },
       ],
@@ -404,7 +456,7 @@ export class HomePage implements OnInit {
             const novoNome = nome || 'Lista de Compras';
 
             await this.shoppingService.setNomeLista(novoNome);
-            this.nomeLista = novoNome;
+            this.atualizarListasEDados();
           },
         },
       ],
@@ -423,8 +475,8 @@ export class HomePage implements OnInit {
       await this.shoppingService.alternarComprado(item.id);
     }
 
-    this.lista = this.shoppingService.getItens();
-    this.ordenarLista();
+    this.atualizarListasEDados();
+
   }
 
     async limparApenasComprados() {
@@ -448,8 +500,8 @@ export class HomePage implements OnInit {
             for (const item of comprados) {
               await this.shoppingService.remover(item.id);
             }
-            this.lista = this.shoppingService.getItens();
-            this.ordenarLista();
+            this.atualizarListasEDados();
+
           },
         },
       ],
@@ -505,8 +557,7 @@ export class HomePage implements OnInit {
                 categoria: cat,
               })
               .then(() => {
-                this.lista = this.shoppingService.getItens();
-                this.ordenarLista();
+                this.atualizarListasEDados();
               });
 
             return true;

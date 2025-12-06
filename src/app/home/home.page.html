@@ -27,7 +27,32 @@
       <ion-card-title>Filtros</ion-card-title>
     </ion-card-header>
 
-    <ion-card-content>
+        <ion-card-content>
+      <!-- 🆕 Seleção de lista + botão criar -->
+      <ion-item>
+        <ion-label>Lista</ion-label>
+        <ion-select
+          [(ngModel)]="listaSelecionadaId"
+          interface="popover"
+          (ionChange)="trocarLista()">
+          <ion-select-option
+            *ngFor="let l of listas"
+            [value]="l.id">
+            {{ l.nome }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        size="small"
+        class="ion-margin-bottom"
+        (click)="novaLista()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Nova lista
+      </ion-button>
+
       <!-- Contadores -->
       <div class="resumo-lista">
         <p>
