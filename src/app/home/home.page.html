@@ -16,6 +16,13 @@
     </ion-title>
 
     <ion-buttons slot="end">
+      <!-- Botão de filtros/configurações -->
+      <ion-button (click)="abrirFiltros()">
+        <ion-icon slot="start" name="options-outline"></ion-icon>
+        Filtros
+      </ion-button>
+
+      <!-- Botão de limpar lista -->
       <ion-button (click)="limparTudo()" [disabled]="lista.length === 0">
         <ion-icon slot="start" name="trash-outline"></ion-icon>
         Limpar
@@ -27,18 +34,18 @@
 <ion-content class="home-content">
   <div class="home-wrapper ion-padding">
 
-    <!-- CARD: Filtros e configurações -->
-    <ion-card class="card-filtros">
+    <!-- 🔹 PAINEL DE FILTROS & CONFIGURAÇÕES (aparece ao clicar em Filtros) -->
+    <ion-card class="card-filtros" *ngIf="filtrosVisiveis">
       <ion-card-header>
         <ion-card-title>
-          <ion-icon name="funnel-outline"></ion-icon>
-          <span>Filtros & Lista</span>
+          <ion-icon name="options-outline"></ion-icon>
+          <span>Filtros & Configurações</span>
         </ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
 
-        <!-- Seleção de lista + criar nova -->
+        <!-- Lista atual + troca de lista -->
         <ion-item>
           <ion-label>Lista</ion-label>
           <ion-select
@@ -57,7 +64,7 @@
           expand="block"
           fill="outline"
           size="small"
-          class="ion-margin-bottom"
+          class="ion-margin-top"
           (click)="novaLista()">
           <ion-icon slot="start" name="add-outline"></ion-icon>
           Nova lista
@@ -83,7 +90,7 @@
           </div>
         </div>
 
-        <!-- Categoria e filtros -->
+        <!-- Filtros -->
         <ion-item>
           <ion-label>Categoria</ion-label>
           <ion-select [(ngModel)]="categoriaFiltro" interface="popover">

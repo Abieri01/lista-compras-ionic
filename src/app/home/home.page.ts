@@ -94,7 +94,7 @@ export class HomePage implements OnInit {
   // lista
   lista: ShoppingItem[] = [];
 
-  // 🆕 nome da lista
+  // nome da lista
   nomeLista: string = 'Lista de Compras';
 
   // multi-listas
@@ -104,22 +104,29 @@ export class HomePage implements OnInit {
   // tema
   temaEscuro: boolean = false;
 
+  // novo: painel de filtros visível ou não
+  filtrosVisiveis = false;
+
   constructor(
-  private shoppingService: ShoppingListService,
-  private alertController: AlertController,
-  private themeService: ThemeService,
-) {}
+    private shoppingService: ShoppingListService,
+    private alertController: AlertController,
+    private themeService: ThemeService,
+  ) {}
 
-   async ngOnInit() {
-  await this.shoppingService.ready();
+  async ngOnInit() {
+    await this.shoppingService.ready();
 
-  // Atualiza listas, itens e nome da lista selecionada
-  this.atualizarListasEDados();
+    // Atualiza listas, itens e nome da lista selecionada
+    this.atualizarListasEDados();
 
-  // Tema salvo
-  this.temaEscuro = this.themeService.carregarTema();
-}
+    // Tema salvo
+    this.temaEscuro = this.themeService.carregarTema();
+  }
 
+  // abre/fecha painel de filtros
+  abrirFiltros() {
+    this.filtrosVisiveis = !this.filtrosVisiveis;
+  }
 
   alternarTema(event: any) {
     const enabled = event.detail.checked; // true/false do toggle
@@ -142,7 +149,7 @@ export class HomePage implements OnInit {
     return this.lista.filter((i) => i.comprado).length;
   }
 
-   get totalUnidades(): number {
+  get totalUnidades(): number {
     return this.lista.reduce((acc, item) => acc + (item.quantidade || 0), 0);
   }
 
@@ -168,8 +175,8 @@ export class HomePage implements OnInit {
     return itens;
   }
 
-  // lista "principal" considerando filtro de categoria e toggle "apenas não comprados"
-    get listaFiltrada(): ShoppingItem[] {
+  // lista principal (categoria + toggle + busca)
+  get listaFiltrada(): ShoppingItem[] {
     let itens = this.filtrarPorCategoriaBase();
 
     if (this.mostrarSomenteNaoComprados) {
@@ -186,9 +193,8 @@ export class HomePage implements OnInit {
     return itens;
   }
 
-  // lista só de comprados, respeitando filtro de categoria,
-  // mas ignorando "apenas não comprados" (se toggle on, não mostra mesmo)
-    get listaCompradosFiltrados(): ShoppingItem[] {
+  // lista só de comprados (respeita categoria e busca, mas não o toggle de "só não comprados")
+  get listaCompradosFiltrados(): ShoppingItem[] {
     if (this.mostrarSomenteNaoComprados) {
       return [];
     }
@@ -209,7 +215,6 @@ export class HomePage implements OnInit {
   // ---------------------------
   // AGRUPAMENTO POR CATEGORIA
   // ---------------------------
-  // grupos de NÃO COMPRADOS
   get gruposPorCategoriaNaoComprados(): { categoria: string; itens: ShoppingItem[] }[] {
     const mapa = new Map<string, ShoppingItem[]>();
 
@@ -241,7 +246,6 @@ export class HomePage implements OnInit {
     return grupos;
   }
 
-  // grupos de COMPRADOS (para seção separada lá embaixo)
   get gruposPorCategoriaComprados(): { categoria: string; itens: ShoppingItem[] }[] {
     const mapa = new Map<string, ShoppingItem[]>();
 
@@ -293,10 +297,11 @@ export class HomePage implements OnInit {
       return 0;
     });
   }
+
   // ---------------------------
-  // ATUALIZAR LISTA E DADOS 
+  // ATUALIZAR LISTAS E DADOS
   // ---------------------------
-    private atualizarListasEDados() {
+  private atualizarListasEDados() {
     const listasService = this.shoppingService.getListas();
     this.listas = listasService.map((l) => ({
       id: l.id,
@@ -309,7 +314,7 @@ export class HomePage implements OnInit {
     this.ordenarLista();
   }
 
-    async trocarLista() {
+  async trocarLista() {
     if (this.listaSelecionadaId == null) return;
 
     await this.shoppingService.selecionarLista(this.listaSelecionadaId);
@@ -363,7 +368,7 @@ export class HomePage implements OnInit {
     this.novaCategoria = 'Geral';
   }
 
-    async remover(item: ShoppingItem) {
+  async remover(item: ShoppingItem) {
     const alert = await this.alertController.create({
       header: 'Remover item',
       message: `Deseja remover "<strong>${item.nome}</strong>" da lista?`,
@@ -391,7 +396,7 @@ export class HomePage implements OnInit {
     this.atualizarListasEDados();
   }
 
-    async limparTudo() {
+  async limparTudo() {
     if (!this.lista.length) {
       return;
     }
@@ -433,7 +438,7 @@ export class HomePage implements OnInit {
     this.novaCategoria = nome; // já seleciona pro próximo item
   }
 
-    async renomearLista() {
+  async renomearLista() {
     const alert = await this.alertController.create({
       header: 'Nome da lista',
       inputs: [
@@ -476,10 +481,9 @@ export class HomePage implements OnInit {
     }
 
     this.atualizarListasEDados();
-
   }
 
-    async limparApenasComprados() {
+  async limparApenasComprados() {
     const comprados = this.lista.filter((i) => i.comprado);
     if (!comprados.length) {
       return;
@@ -501,7 +505,6 @@ export class HomePage implements OnInit {
               await this.shoppingService.remover(item.id);
             }
             this.atualizarListasEDados();
-
           },
         },
       ],
@@ -546,7 +549,6 @@ export class HomePage implements OnInit {
             const cat = (data.categoria ?? '').trim() || 'Geral';
 
             if (!nome) {
-              // se não tiver nome, não deixa fechar salvando
               return false;
             }
 

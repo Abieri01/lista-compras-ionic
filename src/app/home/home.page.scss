@@ -1,5 +1,6 @@
 .home-content {
-  /* deixa o conteúdo mais "app" centralizado */
+  /* fundo padrão da página */
+  --background: var(--ion-color-light, #f4f5f8);
 }
 
 .home-wrapper {
@@ -183,7 +184,13 @@ ion-card-title {
   }
 }
 
-/* Dark mode refinamentos específicos deste page */
+/* ============================
+   DARK MODE (página principal)
+   ============================ */
+:host-context(body.dark) .home-content {
+  --background: #000000;
+}
+
 :host-context(body.dark) .grupo-categoria {
   background: rgba(255, 255, 255, 0.02);
 }
@@ -194,4 +201,54 @@ ion-card-title {
 
 :host-context(body.dark) .grupo-comprados .categoria-header {
   background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================
+   ESTILOS DO MODAL
+   ============================ */
+
+/* Deixa o backdrop um pouco translúcido */
+ion-modal {
+  --backdrop-opacity: 0.4;
+}
+
+/* Conteúdo do modal em modo claro */
+ion-modal ion-content {
+  --background: var(--ion-color-light, #ffffff);
+  color: var(--ion-text-color, #222222);
+}
+
+/* Conteúdo do modal em modo escuro */
+:host-context(body.dark) ion-modal ion-content {
+  --background: #121212;
+  color: #ffffff;
+}
+
+/* Garante que texto interno herde a cor certa */
+ion-modal ion-item,
+ion-modal ion-label,
+ion-modal ion-button,
+ion-modal .resumo-lista,
+ion-modal .resumo-item,
+ion-modal .buscar-item {
+  color: inherit;
+}
+
+/* Searchbar dentro do modal – modo claro */
+ion-modal ion-searchbar {
+  --background: #f4f5f8;
+  --color: #222222;
+  --placeholder-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Searchbar dentro do modal – modo escuro */
+:host-context(body.dark) ion-modal ion-searchbar {
+  --background: #1e1e1e;
+  --color: #ffffff;
+  --placeholder-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Pequeno ajuste nos botões dentro do modal */
+ion-modal .acoes-rapidas ion-button {
+  font-size: 0.9rem;
 }
