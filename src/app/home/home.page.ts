@@ -104,8 +104,9 @@ export class HomePage implements OnInit {
   // tema
   temaEscuro: boolean = false;
 
-  // novo: painel de filtros visível ou não
+  // visibilidade dos painéis
   filtrosVisiveis = false;
+  adicionarVisivel = true; // deixa ligado por padrão
 
   constructor(
     private shoppingService: ShoppingListService,
@@ -126,6 +127,11 @@ export class HomePage implements OnInit {
   // abre/fecha painel de filtros
   abrirFiltros() {
     this.filtrosVisiveis = !this.filtrosVisiveis;
+  }
+
+  // abre/fecha painel de adicionar item
+  abrirAdicionar() {
+    this.adicionarVisivel = !this.adicionarVisivel;
   }
 
   alternarTema(event: any) {
@@ -193,7 +199,7 @@ export class HomePage implements OnInit {
     return itens;
   }
 
-  // lista só de comprados (respeita categoria e busca, mas não o toggle de "só não comprados")
+  // lista só de comprados
   get listaCompradosFiltrados(): ShoppingItem[] {
     if (this.mostrarSomenteNaoComprados) {
       return [];
@@ -278,7 +284,7 @@ export class HomePage implements OnInit {
   }
 
   // ---------------------------
-  // ORDENAR LISTA (armazenada)
+  // ORDENAR LISTA
   // ---------------------------
   private ordenarLista() {
     this.lista.sort((a, b) => {

@@ -16,6 +16,12 @@
     </ion-title>
 
     <ion-buttons slot="end">
+      <!-- Botão para mostrar/esconder formulário de adicionar -->
+      <ion-button (click)="abrirAdicionar()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Item
+      </ion-button>
+
       <!-- Botão de filtros/configurações -->
       <ion-button (click)="abrirFiltros()">
         <ion-icon slot="start" name="options-outline"></ion-icon>
@@ -34,7 +40,7 @@
 <ion-content class="home-content">
   <div class="home-wrapper ion-padding">
 
-    <!-- 🔹 PAINEL DE FILTROS & CONFIGURAÇÕES (aparece ao clicar em Filtros) -->
+    <!-- 🔹 PAINEL DE FILTROS & CONFIGURAÇÕES -->
     <ion-card class="card-filtros" *ngIf="filtrosVisiveis">
       <ion-card-header>
         <ion-card-title>
@@ -158,8 +164,8 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- CARD: Adicionar item -->
-    <ion-card class="card-adicionar">
+    <!-- 🔹 CARD: Adicionar item (colapsável) -->
+    <ion-card class="card-adicionar" *ngIf="adicionarVisivel">
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="cart-outline"></ion-icon>
